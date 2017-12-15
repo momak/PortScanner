@@ -12,9 +12,10 @@ namespace PortScanner
 {
     class Program
     {
-        public const int StartPort = IPEndPoint.MinPort;
-        public const int EndPort = IPEndPoint.MaxPort;
         public const string Localhost = "127.0.0.1";
+
+        public static int StartPort = IPEndPoint.MinPort;
+        public static int EndPort = IPEndPoint.MaxPort;
 
         private static CommandLineOptions _commandLineOptions;
         private static IPAddress _startAddress;
@@ -34,65 +35,73 @@ namespace PortScanner
             _commandLineOptions = commandLineParser.Object;
 
             CreateLocation(_commandLineOptions.OutputLocation);
-
+            IPhelper ipHelper = new IPhelper();
             _writter = new Writter(WriteMode.Both, _outputFile);
 
-            _startAddress = GetIPaddress(_commandLineOptions.StartIpAddress);
+            _writter.WriteLine($"Start application {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+            _writter.WriteLine(Environment.NewLine);
+
+            _writter.WriteLine($"Output location: {_outputFile}");
+
+            _startAddress = ipHelper.GetIPaddress(_commandLineOptions.StartIpAddress);
             _writter.WriteLine($"Start IP address {_startAddress}");
 
-            _endAddress = GetIPaddress(_commandLineOptions.EndIpAddress);
+            StartPort = SetPort(_commandLineOptions.StartPort);
+            EndPort = SetPort(_commandLineOptions.EndPort);
+
+            _endAddress = ipHelper.GetIPaddress(_commandLineOptions.EndIpAddress);
             _writter.WriteLine($"End IP address {_endAddress}");
 
             _maxThread = _commandLineOptions.MaxThreadCount;
             _writter.WriteLine($"Maximum threads allocated {_maxThread}");
 
             _writter.WriteLine($"Starting port {StartPort}");
-
             _writter.WriteLine($"Ending port {EndPort}");
 
-            IPhelper ipHelper = new IPhelper();
-
+            _writter.WriteLine(Environment.NewLine);
             var range = ipHelper.GetIPRange(_startAddress, _endAddress);
 
-            //foreach (string ip in range)
+            RunScan(range, ipHelper);
+            //RunScanParallel(range, ipHelper);
+
+            _writter.WriteLine(Environment.NewLine);
+            _writter.WriteLine($"Exiting application {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+        }
+
+        private static void RunScan(IEnumerable<string> range, IPhelper ipHelper)
+        {
+            foreach (string ip in range)
+            {
+                if (ipHelper.Ping(ip))
+                {
+                    _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+
+                    PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
+                    pScanner.Start(_maxThread);
+                }
+                else
+                {
+                    _writter.WriteLine($"Host {ip} is not active @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+                }
+            }
+        }
+
+        private static void RunScanParallel(IEnumerable<string> range, IPhelper ipHelper)
+        {
             Parallel.ForEach(range, ip =>
             {
-                _writter.WriteLine($"Starting scan for IP: {ip}");
+                if (ipHelper.Ping(ip))
+                {
+                    _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
 
-                PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
-                pScanner.Start(_maxThread);
-
+                    PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
+                    pScanner.Start(_maxThread);
+                }
+                else
+                {
+                    _writter.WriteLine($"Host {ip} is not active @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+                }
             });
-
-        }
-
-        public static IPAddress GetLocalIPAddress()
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return IPAddress.Parse(ip.ToString());
-                }
-            }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
-        }
-
-        private static IPAddress GetIPaddress(string ipAddress)
-        {
-            if (!string.IsNullOrWhiteSpace(ipAddress))
-            {
-                try
-                {
-                    return IPAddress.Parse(ipAddress);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{ipAddress} is not a valid ip address: " + e.Message);
-                }
-            }
-            return GetLocalIPAddress();
         }
 
         private static void CreateLocation(string pathToFolder)
@@ -100,15 +109,25 @@ namespace PortScanner
             if (!string.IsNullOrWhiteSpace(pathToFolder))
             {
                 if (!Directory.Exists(pathToFolder))
-                {
                     Directory.CreateDirectory(pathToFolder);
-                }
-                _outputFile = pathToFolder + "\\" + DateTime.Now.ToString("yyyy_MM-dd-HH-mm") + ".txt";
+
+                _outputFile = pathToFolder + "\\" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + ".txt";
+
+                if (File.Exists(_outputFile))
+                    File.Delete(_outputFile);
             }
             else
             {
                 throw new Exception("Cannot create output directory/file!");
             }
+        }
+
+        private static int SetPort(string port)
+        {
+            if (!string.IsNullOrWhiteSpace(port))
+                return int.Parse(port);
+
+            throw new Exception("Not a valid Port number");
         }
 
     }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace PortScanner
 {
     class PortList
     {
+        readonly Object thisLock = new Object();
         private int start;
         private int stop;
         private int ptr;
@@ -17,19 +19,22 @@ namespace PortScanner
             this.stop = stop;
             this.ptr = start;
         }
-        public PortList() : this(1, 65535)
+        public PortList() : this(IPEndPoint.MinPort, IPEndPoint.MaxPort)
         {
         }
 
-        public bool hasMore()
+        public bool HasMore()
         {
             return (stop - ptr) >= 0;
         }
-        public int getNext()
+        public int GetNext()
         {
-            if (hasMore())
-                return ptr++;
-            return -1;
+            lock (thisLock)
+            {
+                if (HasMore())
+                    return ptr++;
+                return -1;
+            }
         }
     }
 }

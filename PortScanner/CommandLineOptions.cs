@@ -14,10 +14,14 @@ namespace PortScanner
 
         public string EndIpAddress { get; set; }
 
+        public string StartPort { get; set; }
+
+        public string EndPort { get; set; }
+
         public string OutputLocation { get; set; }
 
         public int MaxThreadCount { get; set; }
-        
+
         public static FluentCommandLineParser<CommandLineOptions> Setup()
         {
             var p = new FluentCommandLineParser<CommandLineOptions>();
@@ -31,6 +35,18 @@ namespace PortScanner
                 .As('e', "EndIp")
                 .Required()
                 .WithDescription("Ending IP address");
+
+            p.Setup(arg => arg.StartPort)
+                .As('a', "StartPort")
+                .Required()
+                .WithDescription("Starting Port")
+                .SetDefault("0");
+
+            p.Setup(arg => arg.EndPort)
+                .As('z', "EndPort")
+                .Required()
+                .WithDescription("Ending Port")
+                .SetDefault("65535");
 
             p.Setup(arg => arg.OutputLocation)
                 .As('o', "Output")
