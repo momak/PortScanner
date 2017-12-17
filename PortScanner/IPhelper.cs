@@ -87,17 +87,29 @@ namespace PortScanner
 
         public bool Ping(IPAddress address)
         {
-            Ping pingSender = new Ping();
-            PingReply reply = pingSender.Send(address);
-
-            return reply.Status == IPStatus.Success;
+            try
+            {
+                Ping pingSender = new Ping();
+                PingReply reply = pingSender.Send(address);
+                return reply.Status == IPStatus.Success;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
         public bool Ping(string address)
         {
-            Ping pingSender = new Ping();
-            PingReply reply = pingSender.Send(address);
-
-            return reply.Status == IPStatus.Success;
+            try
+            {
+                Ping pingSender = new Ping();
+                PingReply reply = pingSender.Send(address);
+                return reply.Status == IPStatus.Success;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 }

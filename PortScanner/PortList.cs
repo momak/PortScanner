@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 
 namespace PortScanner
 {
@@ -29,12 +30,24 @@ namespace PortScanner
         }
         public int GetNext()
         {
-            lock (thisLock)
+            Monitor.Enter(thisLock);
+            try
             {
                 if (HasMore())
                     return ptr++;
                 return -1;
             }
+            finally
+            {
+                Monitor.Exit(thisLock);
+            }
+
+            //lock (thisLock)
+            //{
+            //    if (HasMore())
+            //        return ptr++;
+            //    return -1;
+            //}
         }
     }
 }

@@ -61,8 +61,8 @@ namespace PortScanner
             _writter.WriteLine(Environment.NewLine);
             var range = ipHelper.GetIPRange(_startAddress, _endAddress);
 
-            RunScan(range, ipHelper);
-            //RunScanParallel(range, ipHelper);
+            //RunScan(range, ipHelper);
+            RunScanParallel(range, ipHelper);
 
             _writter.WriteLine(Environment.NewLine);
             _writter.WriteLine($"Exiting application {DateTime.Now:yyyy.MM.dd HH:mm:sss}");

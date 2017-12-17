@@ -10,6 +10,8 @@ namespace PortScanner
 {
     class PortScanner
     {
+        private static CountdownEvent _countdown;
+
         private string _host;
         private PortList _portList;
         private ILog _log;
@@ -33,22 +35,30 @@ namespace PortScanner
 
         public void Start(int threadCtr)
         {
-            Task[] tasks = new Task[threadCtr];
+            //Task[] tasks = new Task[threadCtr];
+            //for (int i = 0; i < threadCtr; i++)
+            //{
+            //    tasks[i] = Task.Factory.StartNew(Run);
+
+            //}
+            //Task.WaitAll(tasks);
+
+            _countdown = new CountdownEvent(threadCtr);
 
             for (int i = 0; i < threadCtr; i++)
             {
-                tasks[i] = Task.Factory.StartNew(Run);
-                
+                Thread th = new Thread(new ThreadStart(Run));
+                th.Name = i.ToString();
+                th.Start();
             }
-            Task.WaitAll(tasks);
 
-            //Thread th = new Thread(new ThreadStart(Run));
-            // th.Name = i.ToString();
-            // th.Start();
-
+            _countdown.Wait();
         }
+
         public void Run()
         {
+            _log.WriteLine($"Thread Id {Thread.CurrentThread.ManagedThreadId}");
+
             int port;
             TcpClient tcp = new TcpClient();
             //tcp.ReceiveTimeout = 1000;
@@ -78,6 +88,8 @@ namespace PortScanner
                     _log.WriteLine($"Ending scan for IP: {port}@{_host}");
                 }
             }
+            _countdown.Signal();
+            //_log.WriteLine($"Remainig threads: {countdown.CurrentCount}");
             //_log.WriteLine($"Ending scan for IP: {port}@{_host}");
         }
     }
