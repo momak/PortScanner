@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PortScanner
@@ -61,9 +62,10 @@ namespace PortScanner
             _writter.WriteLine(Environment.NewLine);
             var range = ipHelper.GetIPRange(_startAddress, _endAddress);
 
+         
             //RunScan(range, ipHelper);
             RunScanParallel(range, ipHelper);
-
+            
             _writter.WriteLine(Environment.NewLine);
             _writter.WriteLine($"Exiting application {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
         }
@@ -93,7 +95,7 @@ namespace PortScanner
                 if (ipHelper.Ping(ip))
                 {
                     _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
-
+                    
                     PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
                     pScanner.Start(_maxThread);
                 }

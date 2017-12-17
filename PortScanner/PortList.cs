@@ -30,24 +30,24 @@ namespace PortScanner
         }
         public int GetNext()
         {
-            Monitor.Enter(thisLock);
-            try
-            {
-                if (HasMore())
-                    return ptr++;
-                return -1;
-            }
-            finally
-            {
-                Monitor.Exit(thisLock);
-            }
-
-            //lock (thisLock)
+            //Monitor.Enter(thisLock);
+            //try
             //{
             //    if (HasMore())
             //        return ptr++;
             //    return -1;
             //}
+            //finally
+            //{
+            //    Monitor.Exit(thisLock);
+            //}
+
+            lock (thisLock)
+            {
+                if (HasMore())
+                    return ptr++;
+                return -1;
+            }
         }
     }
 }

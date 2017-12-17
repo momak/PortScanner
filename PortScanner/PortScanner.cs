@@ -11,7 +11,7 @@ namespace PortScanner
     class PortScanner
     {
         private static CountdownEvent _countdown;
-
+        private static SemaphoreSlim _semaphore;
         private string _host;
         private PortList _portList;
         private ILog _log;
@@ -43,7 +43,8 @@ namespace PortScanner
             //}
             //Task.WaitAll(tasks);
 
-            _countdown = new CountdownEvent(threadCtr);
+            //_semaphore = new SemaphoreSlim(threadCtr);
+            //_countdown = new CountdownEvent(threadCtr);
 
             for (int i = 0; i < threadCtr; i++)
             {
@@ -52,13 +53,12 @@ namespace PortScanner
                 th.Start();
             }
 
-            _countdown.Wait();
+            //_countdown.Wait();
         }
 
         public void Run()
         {
-            _log.WriteLine($"Thread Id {Thread.CurrentThread.ManagedThreadId}");
-
+           
             int port;
             TcpClient tcp = new TcpClient();
             //tcp.ReceiveTimeout = 1000;
@@ -88,8 +88,10 @@ namespace PortScanner
                     _log.WriteLine($"Ending scan for IP: {port}@{_host}");
                 }
             }
-            _countdown.Signal();
-            //_log.WriteLine($"Remainig threads: {countdown.CurrentCount}");
+
+            //_semaphore.Release();
+            //_countdown.Signal();
+            //_log.WriteLine($"Remainig threads: {_countdown.CurrentCount}");
             //_log.WriteLine($"Ending scan for IP: {port}@{_host}");
         }
     }
