@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLineOptions.cs" />
+    <Compile Include="ConsoleWrite.cs" />
+    <Compile Include="FileWrite.cs" />
     <Compile Include="ILog.cs" />
     <Compile Include="IPhelper.cs" />
     <Compile Include="PortList.cs" />

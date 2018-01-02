@@ -79,7 +79,7 @@ namespace PortScanner
                     _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
 
                     PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
-                    pScanner.Start(_maxThread);
+                    pScanner.StartWork(_maxThread);
                 }
                 else
                 {
@@ -97,7 +97,7 @@ namespace PortScanner
                     _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
                     
                     PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
-                    pScanner.Start(_maxThread);
+                    pScanner.StartWork(_maxThread);
                 }
                 else
                 {

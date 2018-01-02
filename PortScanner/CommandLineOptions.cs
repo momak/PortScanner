@@ -38,13 +38,11 @@ namespace PortScanner
 
             p.Setup(arg => arg.StartPort)
                 .As('a', "StartPort")
-                .Required()
                 .WithDescription("Starting Port")
                 .SetDefault("0");
 
             p.Setup(arg => arg.EndPort)
                 .As('z', "EndPort")
-                .Required()
                 .WithDescription("Ending Port")
                 .SetDefault("65535");
 
