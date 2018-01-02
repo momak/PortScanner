@@ -72,7 +72,7 @@ namespace PortScanner
 
             }
             Task.WaitAll(tasks);
-
+            //Program.countdown.Signal();
             //_semaphore = new SemaphoreSlim(threadCtr);
             //_countdown = new CountdownEvent(threadCtr);
 
@@ -94,13 +94,16 @@ namespace PortScanner
             {
                 try
                 {
-                     _log.WriteLine($"Scanning {port}@{_host}");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    _log.WriteLine($"Scanning {port}@{_host}");
                     tcp = new TcpClient(_host, port);
+                    Console.ForegroundColor = ConsoleColor.Green;
                     _log.WriteLine($"Port {port}@{_host} is open");
                 }
                 catch (Exception e)
                 {
-                     _log.WriteLine($"Port {port}@{_host} not open");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    _log.WriteLine($"Port {port}@{_host} not open");
                     continue;
                 }
                 finally
@@ -114,9 +117,10 @@ namespace PortScanner
 
                     }
                 }
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 _log.WriteLine($"Ending scan for IP: {_host}");
             }
-            _countdown.Signal();
+            //_countdown.Signal();
         }
     }
 }

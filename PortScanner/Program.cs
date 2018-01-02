@@ -26,6 +26,8 @@ namespace PortScanner
 
         private static Writter _writter;
 
+        public static CountdownEvent countdown;
+
 
         static void Main(string[] args)
         {
@@ -62,48 +64,73 @@ namespace PortScanner
             _writter.WriteLine(Environment.NewLine);
             var range = ipHelper.GetIPRange(_startAddress, _endAddress);
 
-         
+
             //RunScan(range, ipHelper);
             RunScanParallel(range, ipHelper);
-            
+
             _writter.WriteLine(Environment.NewLine);
             _writter.WriteLine($"Exiting application {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
         }
 
         private static void RunScan(IEnumerable<string> range, IPhelper ipHelper)
         {
-            foreach (string ip in range)
-            {
-                if (ipHelper.Ping(ip))
+            //using (countdown = new CountdownEvent(1))
+            //{
+                foreach (string ip in range)
                 {
-                    _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+                    if (ipHelper.Ping(ip))
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+                        //countdown.TryAddCount();
 
-                    PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
-                    pScanner.StartWork(_maxThread);
-                }
-                else
-                {
+                        using (PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter))
+                        {
+                            pScanner.StartWork(_maxThread);
+                        }
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
                     _writter.WriteLine($"Host {ip} is not active @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
+                    }
                 }
-            }
+
+            //    while (countdown.Signal())
+            //    {
+            //        countdown.Wait();
+            //    }
+            //}
         }
 
         private static void RunScanParallel(IEnumerable<string> range, IPhelper ipHelper)
         {
+            //using (countdown = new CountdownEvent(1))
+            //{
             Parallel.ForEach(range, ip =>
             {
                 if (ipHelper.Ping(ip))
                 {
+                    //countdown.TryAddCount();
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
                     _writter.WriteLine($"Starting scan for IP: {ip} @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
-                    
+
                     PortScanner pScanner = new PortScanner(ip, StartPort, EndPort, _writter);
                     pScanner.StartWork(_maxThread);
                 }
                 else
                 {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
                     _writter.WriteLine($"Host {ip} is not active @ {DateTime.Now:yyyy.MM.dd HH:mm:sss}");
                 }
             });
+            //   while (countdown.Signal())
+            //   {
+            //       countdown.Wait();
+            //   }
+
+            //}
         }
 
         private static void CreateLocation(string pathToFolder)
